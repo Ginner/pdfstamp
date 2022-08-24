@@ -5,7 +5,7 @@
 # Overlays a pdf with text and date
 # By Ginner
 #
-# Last modified: 2022.04.26-20:53 +0200
+# Last modified: 2022.08.24-15:57 +0200
 #
 # =============================================================== #
 
@@ -140,7 +140,11 @@ read -r -d '' psoverlay <<- !
     ($date) show
 } def
 /draft-copy {
-    gsave initgraphics 1.0 0.83 0.83 setrgbcolor
+    gsave initgraphics
+    0 .pushpdf14devicefilter
+    .5 .setstrokeconstantalpha
+    .5 .setfillconstantalpha
+    1.0 0.83 0.83 setrgbcolor
     327 421 moveto
     45 rotate
     draft-Bigfont setfont
@@ -155,14 +159,14 @@ if [[ -z "$date" ]]; then
     date="$(/usr/bin/date '+%Y.%m.%d')"
 fi
 
-echo "$psoverlay" | /usr/bin/ps2pdf - "$tmp_pdf"
+echo "$psoverlay" | /usr/bin/gs -dQUIET -dBATCH -dNOPAUSE -dALLOWPSTRANSPARENCY -sDEVICE=pdfwrite -sOutputFile="$tmp_pdf" -
 
 if [[ "$overwrite" == "1" ]]; then
     /usr/bin/qpdf "$1" --replace-input --underlay "$tmp_pdf" --repeat=1 --
 elif [[ -n "$output" ]]; then
     /usr/bin/qpdf "$1" --underlay "$tmp_pdf" --repeat=1 -- "$output"
 else
-    /usr/bin/qpdf "$1" --underlay "$tmp_pdf" --repeat=1 -- "${date}_${1}"
+    /usr/bin/qpdf "$1" --overlay "$tmp_pdf" --repeat=1 -- "${date}_${1}"
 fi
 
 rm "$tmp_pdf"
