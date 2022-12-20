@@ -5,7 +5,7 @@
 # Overlays a pdf with text and date
 # By Ginner
 #
-# Last modified: 2022.08.24-15:57 +0200
+# Last modified: 2022.12.20-08:55 +0100
 #
 # =============================================================== #
 
@@ -19,20 +19,22 @@ Per default, a date (today if none is given) is prepended the filename.
 Usage: pdfstamp [OPTIONS] target.pdf
 
 Options:
-    -h, --help                      Print help and exit.
-    -p, --paid                      Overlay "PAID" on the specified pdf
-    -a, --draft                     Overlay "DRAFT"
-    -b, --betalt                    Overlay "BETALT"
-    -f, --foreløbig                 Overlay "FORELØBIG"
-    -g, --bogført                   Overlay "BOGFØRT"
-    -d, --today                     Add today's date to the overlay, or overlay
-                                    it as main, if specified alone.
-    -C, --custom <TEXT>             Overlay the specified <TEXT>
-    -D, --date <DATE>               Add <DATE> to the overlay, or overlay it as
-                                    main, if specified alone.
-    --overwrite                     DANGER! Overwrites the <target.pdf>
-    -o, --output                    Supply an output filename.
-    -s, --silent                    Suppress output.
+    -h, --help            Print help and exit.
+    -p, --paid            Overlay "PAID" on the specified pdf
+    -a, --draft           Overlay "DRAFT"
+    -b, --betalt          Overlay "BETALT"
+    -f, --foreløbig       Overlay "FORELØBIG"
+    -g, --bogført         Overlay "BOGFØRT"
+    -d, --today           Add today's date to the overlay, or overlay it as main,
+                          if specified alone.
+    -C, --custom <TEXT>   Overlay the specified <TEXT>
+    -D, --date <DATE>     Add <DATE> to the overlay, or overlay it as main, if
+                          specified alone.
+    --overwrite           DANGER! Overwrites the <target.pdf>
+    -o, --output          Supply an output filename.
+    -F, --front           Place the text over the content, default is to put it
+                          below.
+    -s, --silent          Suppress output.
 
 Example command: pdfstamp -p -d invoice.pdf
     Puts a watermark on 'YYYY-MM-DD_invoice.pdf' saying 'Paid' with today's
@@ -104,6 +106,10 @@ while [[ $# -gt 0 ]]; do
             shift
             shift
             ;;
+        -F|--front)
+            front="1"
+            shift
+            ;;
         *)
             positional+=("$1")
             shift
@@ -119,6 +125,12 @@ fi
 if [[ -z "$text" ]]; then
     text="$date"
     date=""
+fi
+
+if [[ -z "$front" ]]; then
+    layer="--underlay"
+else
+    layer="--overlay"
 fi
 
 tmp_pdf="/tmp/pdfstamp_$(/usr/bin/tr -dc A-Z0-9 </dev/urandom | head -c 8; echo '').pdf"
@@ -162,11 +174,11 @@ fi
 echo "$psoverlay" | /usr/bin/gs -dQUIET -dBATCH -dNOPAUSE -dALLOWPSTRANSPARENCY -sDEVICE=pdfwrite -sOutputFile="$tmp_pdf" -
 
 if [[ "$overwrite" == "1" ]]; then
-    /usr/bin/qpdf "$1" --replace-input --underlay "$tmp_pdf" --repeat=1 --
+    /usr/bin/qpdf "$1" --replace-input "$layer" "$tmp_pdf" --repeat=1 --
 elif [[ -n "$output" ]]; then
-    /usr/bin/qpdf "$1" --underlay "$tmp_pdf" --repeat=1 -- "$output"
+    /usr/bin/qpdf "$1" "$layer" "$tmp_pdf" --repeat=1 -- "$output"
 else
-    /usr/bin/qpdf "$1" --overlay "$tmp_pdf" --repeat=1 -- "${date}_${1}"
+    /usr/bin/qpdf "$1" "$layer" "$tmp_pdf" --repeat=1 -- "${date}_${1}"
 fi
 
 rm "$tmp_pdf"
