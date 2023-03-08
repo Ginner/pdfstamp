@@ -5,7 +5,7 @@
 # Overlays a pdf with text and date
 # By Ginner
 #
-# Last modified: 2023.03.08-11:52 +0100
+# Last modified: 2023.03.08-11:55 +0100
 #
 # =============================================================== #
 
@@ -81,7 +81,7 @@ while [[ $# -gt 0 ]]; do
             shift
             ;;
         -d|--today)
-            date="$(/usr/bin/date '+%Y.%m.%d')"
+            date="$(/usr/bin/date '+%Y-%m-%d')"
             ((number_of_dates++))
             shift
             ;;
