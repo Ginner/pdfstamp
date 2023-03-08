@@ -5,7 +5,7 @@
 # Overlays a pdf with text and date
 # By Ginner
 #
-# Last modified: 2022.12.20-08:55 +0100
+# Last modified: 2023.03.08-11:52 +0100
 #
 # =============================================================== #
 
@@ -119,7 +119,7 @@ done
 set -- "${positional[@]}"
 
 if [[ -z "$date" ]]; then
-    date="$(/usr/bin/date '+%Y.%m.%d')"
+    date="$(/usr/bin/date '+%Y-%m-%d')"
 fi
 
 if [[ -z "$text" ]]; then
